@@ -1,4 +1,4 @@
-# terraform\variables.tf
+# variables.tf
 variable "cluster_name" {
   description = "Nombre del cluster o entorno"
   type        = string
