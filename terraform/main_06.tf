@@ -27,9 +27,9 @@ resource "null_resource" "prepare_directory" {
 
   provisioner "local-exec" {
     command = <<-EOT
-      mkdir -p /var/lib/libvirt/images/${var.cluster_name} &&
-      sudo chown -R qemu:qemu /var/lib/libvirt/images/${var.cluster_name} &&
-      sudo chmod -R 755 /var/lib/libvirt/images/${var.cluster_name}
+    mkdir -p /var/lib/libvirt/images/${var.cluster_name} &&
+    sudo chown -R qemu:qemu /var/lib/libvirt/images/${var.cluster_name} &&
+    sudo chmod -R 755 /var/lib/libvirt/images/${var.cluster_name}
     EOT
   }
 }
@@ -41,10 +41,11 @@ resource "libvirt_pool" "volumetmp" {
 }
 
 resource "libvirt_volume" "base" {
-  name   = "${var.cluster_name}-base"
-  source = var.base_image
-  pool   = libvirt_pool.volumetmp.name
-  format = "qcow2"
+  name       = "${var.cluster_name}-base"
+  source     = var.base_image
+  pool       = libvirt_pool.volumetmp.name
+  format     = "qcow2"
+  depends_on = [null_resource.prepare_directory]
 }
 
 data "ct_config" "ignition" {
@@ -59,7 +60,7 @@ resource "libvirt_ignition" "vm_ignition" {
   for_each = toset(var.machines)
 
   name    = "${replace(each.value, "-", "_")}-${replace(var.cluster_name, "-", "_")}-ignition"
-  pool    = libvirt_pool.volumetmp.name
+  pool    = "default"
   content = data.ct_config.ignition[each.value].rendered
 }
 
@@ -67,8 +68,8 @@ resource "libvirt_volume" "vm_disk" {
   for_each = toset(var.machines)
 
   name   = "${replace(each.value, "-", "_")}-${replace(var.cluster_name, "-", "_")}.qcow2"
-  pool   = libvirt_pool.volumetmp.name
-  source = libvirt_volume.base.id
+  pool   = "default"
+  source = "/var/lib/libvirt/images/flatcar_image/flatcar_production_qemu_image.img"
   format = "qcow2"
 }
 
@@ -91,7 +92,7 @@ resource "libvirt_domain" "machine" {
   }
 
   disk {
-    volume_id = libvirt_ignition.vm_ignition[each.value].id
+    volume_id = split(";", libvirt_ignition.vm_ignition[each.value].id)[0]
   }
 
   network_interface {
@@ -109,11 +110,14 @@ resource "libvirt_domain" "machine" {
     listen_type = "address"
     autoport    = true
   }
-}
 
-resource "local_file" "flatcar" {
-  for_each = data.ct_config.ignition
-  content  = each.value.rendered
-  filename = "${path.module}/outputs/${each.key}.ign"
+
+  resource "local_file" "flatcar" {
+    for_each = data.ct_config.ignition
+    content  = each.value.rendered
+    filename = "${path.module}/outputs/${each.key}.ign"
+  }
+
+  depends_on = [libvirt_network.kube_network]
 }
 

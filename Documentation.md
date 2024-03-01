@@ -248,3 +248,15 @@ sudo journalctl -u libvirtd
 
 
 cat terraform/main.tf && cat terraform/variables.tf && cat terraform/outputs.tf && cat terraform/terraform.tfvars && cat configs/machine-1-config.yaml.tmpl && cat configs/machine-2-config.yaml.tmpl && cat configs/machine-3-config.yaml.tmpl && cat terraform/outputs/machine-1.ign  &&  tree -h rm.tfvars && cat configs/machine-1-config.
+
+
+
+
+virsh net-define /path/to/k8s-network.xml
+virsh net-start k8s-network
+virsh net-autostart k8s-network
+
+
+virsh net-define /path/to/k8s-network.xml
+virsh net-start k8s-network
+virsh net-autostart k8s-network
