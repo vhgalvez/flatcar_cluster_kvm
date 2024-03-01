@@ -68,11 +68,10 @@ data "ct_config" "ignition" {
   for_each = toset(var.machines)
 
   content = templatefile("${path.module}/../configs/${each.key}-config.yaml.tmpl", {
-    message = "Bienvenido a ${each.key}. Aquí está tu mensaje personalizado.",
+    message             = "Bienvenido a ${each.key}. Aquí está tu mensaje personalizado.",
     ssh_authorized_keys = join("\n", var.ssh_keys)
   })
 }
-
 
 resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
