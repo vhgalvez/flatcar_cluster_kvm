@@ -1,3 +1,4 @@
+# main.tf
 terraform {
   required_version = ">= 0.13.0"
   required_providers {
@@ -29,20 +30,17 @@ resource "null_resource" "prepare_directory" {
     EOT
   }
 }
-
 resource "libvirt_pool" "volumetmp" {
   name = var.cluster_name
   type = "dir"
   path = "/var/lib/libvirt/images/${var.cluster_name}"
 }
-
 resource "libvirt_volume" "base" {
   name   = "${var.cluster_name}-base"
   source = var.base_image
   pool   = libvirt_pool.volumetmp.name
   format = "qcow2"
 }
-
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
   name           = "${each.value}-entorno-testing.qcow2"
@@ -50,7 +48,6 @@ resource "libvirt_volume" "vm_disk" {
   pool           = libvirt_pool.volumetmp.name
   format         = "qcow2"
 }
-
 resource "libvirt_network" "kube_network" {
   name      = "k8snet"
   mode      = "nat"
@@ -63,7 +60,6 @@ resource "libvirt_network" "kube_network" {
     enabled = true
   }
 }
-
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
 
@@ -72,9 +68,6 @@ data "ct_config" "ignition" {
     ssh_authorized_keys = yamlencode(var.ssh_keys)
   })
 }
-
-
-
 resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
 
