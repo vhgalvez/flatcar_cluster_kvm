@@ -69,11 +69,9 @@ data "ct_config" "ignition" {
 
   content = templatefile("${path.module}/../configs/${each.key}-config.yaml.tmpl", {
     message             = "Bienvenido a ${each.key}. Aquí está tu mensaje personalizado.",
-    ssh_authorized_keys = var.ssh_keys,
-    key                 = each.key # Add this line to include the machine's name as a variable.
+    ssh_authorized_keys = yamlencode(var.ssh_keys)
   })
 }
-
 
 
 

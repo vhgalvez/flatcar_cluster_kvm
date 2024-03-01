@@ -14,7 +14,4 @@ storage:
 passwd:
   users:
     - name: core
-      ssh_authorized_keys: 
-        [% for key in ssh_authorized_keys %]
-        - "${key}"
-        [% endfor %]
+      ssh_authorized_keys: ${ssh_authorized_keys}
