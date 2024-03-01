@@ -41,10 +41,10 @@ resource "libvirt_pool" "volumetmp" {
 }
 
 resource "libvirt_volume" "base" {
-  name       = "${var.cluster_name}-base"
-  source     = var.base_image
-  pool       = libvirt_pool.volumetmp.name
-  format     = "qcow2"
+  name   = "${var.cluster_name}-base"
+  source = var.base_image
+  pool   = libvirt_pool.volumetmp.name
+  format = "qcow2"
   depends_on = [null_resource.prepare_directory]
 }
 
@@ -58,14 +58,14 @@ data "ct_config" "ignition" {
 
 resource "libvirt_ignition" "vm_ignition" {
   for_each = toset(var.machines)
-  name     = "${each.value}-entorno-testing-ignition"
+  name     = "${each.value}-${var.cluster_name}-ignition"
   pool     = libvirt_pool.volumetmp.name
   content  = data.ct_config.ignition[each.value].rendered
 }
 
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
-  name           = "${each.value}-entorno-testing.qcow2"
+  name           = "${each.value}-${var.cluster_name}.qcow2"
   base_volume_id = libvirt_volume.base.id
   pool           = libvirt_pool.volumetmp.name
   format         = "qcow2"
@@ -116,5 +116,12 @@ resource "libvirt_domain" "machine" {
     autoport    = true
   }
 
+  # Coloca depends_on dentro del recurso para asegurar que la red esté creada primero
   depends_on = [libvirt_network.kube_network]
+}
+
+resource "local_file" "flatcar" {
+  for_each = data.ct_config.ignition
+  content  = each.value.rendered
+  filename = "${path.module}/outputs/${each.key}.ign"
 }
