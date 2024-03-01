@@ -15,4 +15,4 @@ passwd:
   users:
     - name: core
       ssh_authorized_keys: 
-        - ${join("\n", ssh_keys)}
+        ${ssh_authorized_keys}

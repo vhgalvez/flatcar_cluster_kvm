@@ -23,9 +23,9 @@ resource "null_resource" "prepare_directory" {
 
   provisioner "local-exec" {
     command = <<-EOT
-    mkdir -p /var/lib/libvirt/images/${var.cluster_name} &&
-    sudo chown -R qemu:qemu /var/lib/libvirt/images/${var.cluster_name} &&
-    sudo chmod -R 755 /var/lib/libvirt/images/${var.cluster_name}
+      mkdir -p /var/lib/libvirt/images/${var.cluster_name} &&
+      sudo chown -R qemu:qemu /var/lib/libvirt/images/${var.cluster_name} &&
+      sudo chmod -R 755 /var/lib/libvirt/images/${var.cluster_name}
     EOT
   }
 }
