@@ -69,7 +69,7 @@ resource "libvirt_volume" "vm_disk" {
 
   name   = "${replace(each.value, "-", "_")}-${replace(var.cluster_name, "-", "_")}.qcow2"
   pool   = "default"
-  source = "/var/lib/libvirt/images/flatcar-linux/flatcar_production_qemu_image.img"
+  source = "/var/lib/libvirt/images/flatcar_image/flatcar_production_qemu_image.img"
   format = "qcow2"
 }
 
