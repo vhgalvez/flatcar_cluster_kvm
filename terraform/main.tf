@@ -41,26 +41,10 @@ resource "libvirt_pool" "volumetmp" {
 }
 
 resource "libvirt_volume" "base" {
-  name       = "${var.cluster_name}-base"
-  source     = var.base_image
-  pool       = libvirt_pool.volumetmp.name
-  format     = "qcow2"
-  depends_on = [null_resource.prepare_directory]
-}
-
-data "ct_config" "ignition" {
-  for_each = toset(var.machines)
-  content  = templatefile("${path.module}/../configs/${each.key}-config.yaml.tmpl", {
-    ssh_keys = var.ssh_keys,
-    message  = "Custom message here"
-  })
-}
-
-resource "libvirt_ignition" "vm_ignition" {
-  for_each = toset(var.machines)
-  name     = "${each.value}-entorno-testing-ignition"
-  pool     = libvirt_pool.volumetmp.name
-  content  = data.ct_config.ignition[each.value].rendered
+  name   = "${var.cluster_name}-base"
+  source = var.base_image
+  pool   = libvirt_pool.volumetmp.name
+  format = "qcow2"
 }
 
 resource "libvirt_volume" "vm_disk" {
@@ -96,11 +80,6 @@ resource "libvirt_domain" "machine" {
     volume_id = libvirt_volume.vm_disk[each.value].id
   }
 
-  disk {
-    volume    = libvirt_ignition.vm_ignition[each.value].id
-    url       = libvirt_ignition.vm_ignition[each.value].content
-  }
-
   network_interface {
     network_id = libvirt_network.kube_network.id
   }
@@ -116,6 +95,4 @@ resource "libvirt_domain" "machine" {
     listen_type = "address"
     autoport    = true
   }
-
-  depends_on = [libvirt_network.kube_network]
 }
