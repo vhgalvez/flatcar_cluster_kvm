@@ -1,3 +1,4 @@
+# main.tf
 terraform {
   required_version = ">= 0.13.0"
   required_providers {
@@ -8,10 +9,6 @@ terraform {
     ct = {
       source  = "poseidon/ct"
       version = "~> 0.13.0"
-    }
-    template = {
-      source  = "hashicorp/template"
-      version = "~> 2.2.0"
     }
   }
 }
@@ -58,7 +55,6 @@ resource "libvirt_volume" "vm_disk" {
 resource "libvirt_network" "kube_network" {
   name      = "k8snet"
   mode      = "nat"
-  domain    = "k8s.local"
   addresses = ["10.17.3.0/24"]
   dns {
     enabled    = true
@@ -67,6 +63,16 @@ resource "libvirt_network" "kube_network" {
   dhcp {
     enabled = true
   }
+}
+
+# Asumiendo que tienes un archivo de configuración de Butane para cada máquina
+# y que estos archivos están ubicados en el directorio configs/.
+data "ct_config" "ignition" {
+  for_each = toset(var.machines)
+
+  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+    ssh_authorized_keys = var.ssh_keys
+  })
 }
 
 resource "libvirt_domain" "machine" {
@@ -84,15 +90,5 @@ resource "libvirt_domain" "machine" {
     network_id = libvirt_network.kube_network.id
   }
 
-  console {
-    type        = "pty"
-    target_port = "0"
-    target_type = "serial"
-  }
-
-  graphics {
-    type        = "vnc"
-    listen_type = "address"
-    autoport    = true
-  }
+  coreos_ignition = data.ct_config.ignition[each.value].rendered
 }
