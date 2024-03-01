@@ -67,11 +67,11 @@ resource "libvirt_network" "kube_network" {
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
 
-  content = templatefile("${path.module}/../configs/${each.key}-config.yaml.tmpl", {
-    message = "Bienvenido a ${each.key}. Aquí está tu mensaje personalizado.",
-    ssh_authorized_keys = var.ssh_keys
-  })
-}
+content = templatefile("${path.module}/../configs/${each.key}-config.yaml.tmpl", {
+  message = "Bienvenido a ${each.key}. Aquí está tu mensaje personalizado.",
+  ssh_authorized_keys = join(",", var.ssh_keys)
+})
+
 
 
 resource "libvirt_domain" "machine" {
