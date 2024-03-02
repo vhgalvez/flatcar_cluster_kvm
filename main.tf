@@ -31,18 +31,17 @@ resource "libvirt_volume" "base" {
 
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  content  = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
     ssh_keys = var.ssh_keys,
     message  = "Custom message here"
   })
 }
 
 resource "libvirt_ignition" "vm_ignition" {
-  for_each = toset(var.machines)
-  name     = "${each.value}-${var.cluster_name}-ignition"
+  for_each = data.ct_config.ignition
+  name     = "${each.key}-${var.cluster_name}-ignition"
   pool     = libvirt_pool.volumetmp.name
-  content  = data.ct_config.ignition[each.value].rendered
-  depends_on = [libvirt_pool.volumetmp]
+  content  = each.value.rendered
 }
 
 resource "libvirt_volume" "vm_disk" {
@@ -51,7 +50,6 @@ resource "libvirt_volume" "vm_disk" {
   pool           = libvirt_pool.volumetmp.name
   base_volume_id = libvirt_volume.base.id
   format         = "qcow2"
-  depends_on     = [libvirt_volume.base]
 }
 
 resource "libvirt_network" "kube_network" {
@@ -99,8 +97,8 @@ resource "libvirt_domain" "machine" {
 }
 
 resource "local_file" "flatcar" {
-  for_each = data.ct_config.ignition
-  content  = each.value.rendered
-  filename = "/var/lib/libvirt/images/${var.cluster_name}/${each.key}.ign"
+  for_each   = data.ct_config.ignition
+  content    = each.value.rendered
+  filename   = "/var/lib/libvirt/images/${var.cluster_name}/${each.key}.ign"
   depends_on = [libvirt_ignition.vm_ignition]
 }
