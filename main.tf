@@ -79,6 +79,7 @@ resource "libvirt_domain" "machine" {
   console {
     type        = "pty"
     target_type = "serial"
+    target_port = "0" # Línea agregada para corregir el error
   }
 
   graphics {
