@@ -37,7 +37,6 @@ data "ct_config" "ignition" {
   })
 }
 
-
 resource "libvirt_ignition" "vm_ignition" {
   for_each = toset(var.machines)
   name     = "${each.value}-${var.cluster_name}-ignition"
@@ -61,9 +60,10 @@ resource "libvirt_network" "kube_network" {
 
 resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
-  name     = "${each.value}-${var.cluster_name}"
-  vcpu     = var.virtual_cpus
-  memory   = var.virtual_memory
+
+  name   = "${each.value}-${var.cluster_name}"
+  vcpu   = var.virtual_cpus
+  memory = var.virtual_memory
 
   network_interface {
     network_id = libvirt_network.kube_network.id
@@ -80,7 +80,7 @@ resource "libvirt_domain" "machine" {
   console {
     type        = "pty"
     target_type = "serial"
-    target_port = "0" # Línea agregada para corregir el error
+    target_port = "0"
   }
 
   graphics {
@@ -88,4 +88,11 @@ resource "libvirt_domain" "machine" {
     listen_type = "address"
     autoport    = true
   }
+}
+
+
+resource "local_file" "flatcar" {
+  for_each = data.ct_config.ignition
+  content  = each.value.rendered
+  filename = "/var/lib/libvirt/images/entorno-testing/${each.key}.ign"
 }

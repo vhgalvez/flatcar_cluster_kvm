@@ -112,12 +112,12 @@ resource "libvirt_domain" "machine" {
   }
 
 
+  depends_on = [libvirt_network.kube_network]
+}
+
+
   resource "local_file" "flatcar" {
     for_each = data.ct_config.ignition
     content  = each.value.rendered
     filename = "${path.module}/outputs/${each.key}.ign"
   }
-
-  depends_on = [libvirt_network.kube_network]
-}
-
