@@ -72,6 +72,13 @@ resource "libvirt_volume" "vm_disk" {
   format = "qcow2"
 }
 
+resource "local_file" "flatcar" {
+  for_each = data.ct_config.ignition
+  content  = each.value.rendered
+  filename = "${path.module}/var/lib/libvirt/images/entorno-testing/${each.key}.ign"
+}
+
+
 resource "libvirt_network" "kube_network" {
   name      = "kube_network"
   mode      = "nat"
@@ -109,11 +116,5 @@ resource "libvirt_domain" "machine" {
     listen_type = "address"
     autoport    = true
   }
-}
-
-resource "local_file" "flatcar" {
-  for_each = data.ct_config.ignition
-  content  = each.value.rendered
-  filename = "${path.module}/outputs/${each.key}.ign"
 }
 
