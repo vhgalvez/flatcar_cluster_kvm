@@ -42,6 +42,7 @@ resource "libvirt_ignition" "vm_ignition" {
   name     = "${each.value}-${var.cluster_name}-ignition"
   pool     = libvirt_pool.volumetmp.name
   content  = data.ct_config.ignition[each.value].rendered
+  depends_on = [libvirt_pool.volumetmp]
 }
 
 resource "libvirt_volume" "vm_disk" {
@@ -50,6 +51,7 @@ resource "libvirt_volume" "vm_disk" {
   pool           = libvirt_pool.volumetmp.name
   base_volume_id = libvirt_volume.base.id
   format         = "qcow2"
+  depends_on     = [libvirt_volume.base]
 }
 
 resource "libvirt_network" "kube_network" {
@@ -99,5 +101,6 @@ resource "libvirt_domain" "machine" {
 resource "local_file" "flatcar" {
   for_each = data.ct_config.ignition
   content  = each.value.rendered
-  filename = "/var/lib/libvirt/images/entorno-testing/${each.key}.ign"
+  filename = "/var/lib/libvirt/images/${var.cluster_name}/${each.key}.ign"
+  depends_on = [libvirt_ignition.vm_ignition]
 }
