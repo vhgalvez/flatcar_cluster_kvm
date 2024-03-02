@@ -20,19 +20,6 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# resource "null_resource" "prepare_directory" {
-#  triggers = {
-#    always_run = timestamp()
-#  }
-
-#  provisioner "local-exec" {
-#    command = <<-EOT
-#      mkdir -p /var/lib/libvirt/images/${var.cluster_name} &&
-#      sudo chown -R qemu:qemu /var/lib/libvirt/images/${var.cluster_name} &&
-#      sudo chmod -R 755 /var/lib/libvirt/images/${var.cluster_name}
-#    EOT
-#  }
-#}
 
 resource "libvirt_pool" "volumetmp" {
   name = var.cluster_name
