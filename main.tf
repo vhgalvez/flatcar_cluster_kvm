@@ -37,6 +37,7 @@ data "ct_config" "ignition" {
   })
 }
 
+
 resource "libvirt_ignition" "vm_ignition" {
   for_each = toset(var.machines)
   name     = "${each.value}-${var.cluster_name}-ignition"
