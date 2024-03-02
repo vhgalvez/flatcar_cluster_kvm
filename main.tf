@@ -31,9 +31,8 @@ resource "libvirt_volume" "base" {
 
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
-    ssh_keys = var.ssh_keys,
-    message  = "Custom message here"
+  content  = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+    ssh_keys = var.ssh_keys
   })
 }
 
@@ -47,8 +46,8 @@ resource "libvirt_ignition" "vm_ignition" {
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
   name           = "${each.value}-${var.cluster_name}.qcow2"
-  pool           = libvirt_pool.volumetmp.name
   base_volume_id = libvirt_volume.base.id
+  pool           = libvirt_pool.volumetmp.name
   format         = "qcow2"
 }
 
@@ -73,8 +72,14 @@ resource "libvirt_domain" "machine" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  disk {
-    volume_id = libvirt_ignition.vm_ignition[each.key].id
+  coreos_ignition {
+    file = libvirt_ignition.vm_ignition[each.key].id
+  }
+
+  // fw_cfg para pasar la configuración Ignition
+  qemu_fw_cfg {
+    name = "opt/com.coreos/config"
+    file = libvirt_ignition.vm_ignition[each.key].id
   }
 
   console {
@@ -88,17 +93,4 @@ resource "libvirt_domain" "machine" {
     listen_type = "address"
     autoport    = true
   }
-
-  depends_on = [
-    libvirt_network.kube_network,
-    libvirt_volume.vm_disk,
-    libvirt_ignition.vm_ignition
-  ]
-}
-
-resource "local_file" "flatcar" {
-  for_each   = data.ct_config.ignition
-  content    = each.value.rendered
-  filename   = "/var/lib/libvirt/images/${var.cluster_name}/${each.key}.ign"
-  depends_on = [libvirt_ignition.vm_ignition]
 }

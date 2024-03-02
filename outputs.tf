@@ -1,4 +1,4 @@
 # terraform\outputs.tf
-output "ip-addresses" {
-  value = { for key in var.machines : "${var.cluster_name}-${key}" => libvirt_domain.machine[key].network_interface.0.addresses }
+output "machine_ips" {
+  value = { for k, v in libvirt_domain.machine : k => v.network_interface.0.addresses[0] }
 }
