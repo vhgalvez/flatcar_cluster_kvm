@@ -73,8 +73,8 @@ resource "libvirt_domain" "machine" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  coreos_ignition {
-    file = libvirt_ignition.vm_ignition[each.key].id
+  disk {
+    volume_id = libvirt_ignition.vm_ignition[each.key].id
   }
 
   console {
