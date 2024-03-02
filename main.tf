@@ -1,3 +1,4 @@
+
 terraform {
   required_version = ">= 0.13.0"
   required_providers {
@@ -33,6 +34,14 @@ resource "libvirt_volume" "base" {
   format = "qcow2"
 }
 
+resource "libvirt_volume" "ignition" {
+  for_each = toset(var.machines)
+  name     = "${each.key}-ignition.qcow2"
+  pool     = libvirt_pool.volumetmp.name
+  source   = local_file.ignition[each.key].filename
+  format   = "raw"
+}
+
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
   name           = "${each.value}-${var.cluster_name}.qcow2"
@@ -53,14 +62,6 @@ resource "local_file" "ignition" {
   filename = "${path.module}/ignition_files/${each.key}.ign"
 }
 
-resource "libvirt_volume_upload" "ignition" {
-  for_each = toset(var.machines)
-  name     = "${each.key}-ignition.qcow2"
-  pool     = libvirt_pool.volumetmp.name
-  source   = local_file.ignition[each.key].filename
-  format   = "raw"
-}
-
 resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
 
@@ -77,7 +78,7 @@ resource "libvirt_domain" "machine" {
   }
 
   disk {
-    volume_id = libvirt_volume_upload.ignition[each.key].id
+    volume_id = libvirt_volume.ignition[each.key].id
   }
 
   console {
@@ -95,7 +96,7 @@ resource "libvirt_domain" "machine" {
 
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  content = templatefile("${path.module}/../configs/${each.key}-config.yaml.tmpl", {
+  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
     ssh_keys = var.ssh_keys,
     message  = "Custom message here"
   })
