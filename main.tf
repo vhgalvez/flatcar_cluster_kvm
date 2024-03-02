@@ -1,4 +1,4 @@
-
+# Especifica la versión requerida de Terraform y los proveedores necesarios para este script.
 terraform {
   required_version = ">= 0.13.0"
   required_providers {
@@ -10,23 +10,23 @@ terraform {
       source  = "poseidon/ct"
       version = "~> 0.13.0"
     }
-    template = {
-      source  = "hashicorp/template"
-      version = "~> 2.2.0"
-    }
   }
 }
 
+# Configura el proveedor libvirt, que se utiliza para interactuar con el demonio de libvirt.
 provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Crea un pool de almacenamiento en libvirt donde se almacenarán las imágenes de las máquinas virtuales.
 resource "libvirt_pool" "volumetmp" {
   name = var.cluster_name
   type = "dir"
   path = "/var/lib/libvirt/images/${var.cluster_name}"
 }
 
+# Crea un volumen base en el pool de almacenamiento previamente definido.
+# Este volumen se utilizará como imagen base para las máquinas virtuales.
 resource "libvirt_volume" "base" {
   name   = "${var.cluster_name}-base"
   source = var.base_image
@@ -34,14 +34,24 @@ resource "libvirt_volume" "base" {
   format = "qcow2"
 }
 
-resource "libvirt_volume" "ignition" {
+# Genera las configuraciones de Ignition para cada máquina utilizando el proveedor ct.
+# La configuración de Ignition se utiliza para configurar las máquinas en el primer arranque.
+data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  name     = "${each.key}-ignition.qcow2"
-  pool     = libvirt_pool.volumetmp.name
-  source   = local_file.ignition[each.key].filename
-  format   = "raw"
+  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+    ssh_keys = var.ssh_keys
+  })
 }
 
+# Crea un archivo de Ignition para cada máquina en el pool de almacenamiento.
+resource "libvirt_ignition" "vm_ignition" {
+  for_each = data.ct_config.ignition
+  name     = "${each.key}-${var.cluster_name}-ignition"
+  pool     = libvirt_pool.volumetmp.name
+  content  = each.value.rendered
+}
+
+# Crea un volumen para cada máquina en el pool de almacenamiento, utilizando el volumen base como imagen base.
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
   name           = "${each.value}-${var.cluster_name}.qcow2"
@@ -50,17 +60,15 @@ resource "libvirt_volume" "vm_disk" {
   format         = "qcow2"
 }
 
+# Crea una red para que las máquinas virtuales se conecten a ella.
 resource "libvirt_network" "kube_network" {
   name      = "kube_network"
   mode      = "nat"
   addresses = ["10.17.3.0/24"]
 }
 
-resource "local_file" "ignition" {
-  for_each = toset(var.machines)
-  content  = data.ct_config.ignition[each.key].rendered
-  filename = "${path.module}/ignition_files/${each.key}.ign"
-}
+# Crea una máquina virtual para cada máquina definida en la variable `var.machines`.
+# La máquina virtual se configura con la red previamente creada, los volúmenes de disco y el archivo de Ignition.
 resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
 
@@ -76,14 +84,8 @@ resource "libvirt_domain" "machine" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  coreos_ignition {
-    file = libvirt_ignition.vm_ignition[each.key].id
-  }
-
-  // fw_cfg para pasar la configuración Ignition
-  qemu_fw_cfg {
-    name = "opt/com.coreos/config"
-    file = libvirt_ignition.vm_ignition[each.key].id
+  ignition {
+    content = libvirt_ignition.vm_ignition[each.key].content
   }
 
   console {
@@ -97,12 +99,4 @@ resource "libvirt_domain" "machine" {
     listen_type = "address"
     autoport    = true
   }
-}
-
-data "ct_config" "ignition" {
-  for_each = toset(var.machines)
-  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
-    ssh_keys = var.ssh_keys,
-    message  = "Custom message here"
-  })
 }
