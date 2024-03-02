@@ -1,5 +1,4 @@
-output "machine_ips" {
-  value = {
-    for k, v in libvirt_domain.machine : k => length(v.network_interface) > 0 ? v.network_interface[0].addresses[0] : null
-  }
+# terraform\outputs.tf
+output "ip-addresses" {
+  value = { for key in var.machines : key => libvirt_domain.machine[key].network_interface.0.addresses[0] }
 }
