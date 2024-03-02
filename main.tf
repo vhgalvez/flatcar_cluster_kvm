@@ -31,12 +31,11 @@ resource "libvirt_volume" "base" {
 
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+  content  = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
     ssh_keys = var.ssh_keys,
     message  = "Custom message here"
   })
 }
-
 
 resource "libvirt_ignition" "vm_ignition" {
   for_each = toset(var.machines)
@@ -89,11 +88,16 @@ resource "libvirt_domain" "machine" {
     listen_type = "address"
     autoport    = true
   }
-}
 
+  depends_on = [
+    libvirt_network.kube_network,
+    libvirt_volume.vm_disk,
+    libvirt_ignition.vm_ignition
+  ]
+}
 
 resource "local_file" "flatcar" {
   for_each = data.ct_config.ignition
   content  = each.value.rendered
-  filename = "/var/lib/libvirt/images/entorno-testing/${each.key}.ign"
+  filename = "${path.module}/var/lib/libvirt/images/entorno-testing/${each.key}.ign"
 }
