@@ -31,7 +31,7 @@ resource "libvirt_pool" "volumetmp" {
 resource "libvirt_volume" "base" {
   name   = "${var.cluster_name}-base"
   source = var.base_image
-  pool   = libvirt_pool.volumetmp.id
+  pool   = libvirt_pool.volumetmp.name
   format = "qcow2"
 }
 
