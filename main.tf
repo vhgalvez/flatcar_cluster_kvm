@@ -16,6 +16,34 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+variable "cluster_name" {
+  default = "entorno-testing"
+}
+
+variable "base_image" {
+  description = "Path to the base image for the VM"
+}
+
+variable "machines" {
+  description = "Names of the machines to create"
+  default     = ["machine-1", "machine-2", "machine-3"]
+}
+
+variable "ssh_keys" {
+  description = "SSH public keys to add to the core user"
+  default     = ["ssh-rsa AAAAB3N... your public key ..."]
+}
+
+variable "virtual_cpus" {
+  description = "Number of virtual CPUs"
+  default     = 2
+}
+
+variable "virtual_memory" {
+  description = "Amount of memory in MB"
+  default     = 2048
+}
+
 resource "libvirt_network" "kube_network" {
   name      = "kube_network"
   mode      = "nat"
@@ -37,15 +65,15 @@ resource "libvirt_volume" "base" {
 
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
-    ssh_keys = var.ssh_keys
+  content  = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+    ssh_keys = var.ssh_keys,
     message  = "Your custom message here"
   })
 }
 
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
-  name           = "${each.key}-${var.cluster_name}.qcow2"
+  name           = "${each.value}-${var.cluster_name}.qcow2"
   base_volume_id = libvirt_volume.base.id
   pool           = libvirt_pool.volumetmp.name
   format         = "qcow2"
@@ -54,7 +82,7 @@ resource "libvirt_volume" "vm_disk" {
 resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
 
-  name   = "${each.key}-${var.cluster_name}"
+  name   = "${each.value}-${var.cluster_name}"
   vcpu   = var.virtual_cpus
   memory = var.virtual_memory
 
@@ -66,7 +94,6 @@ resource "libvirt_domain" "machine" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  # Modificado para asignar directamente la configuración de Ignition.
   coreos_ignition = data.ct_config.ignition[each.key].rendered
 
   console {
@@ -81,7 +108,6 @@ resource "libvirt_domain" "machine" {
     autoport    = true
   }
 }
-
 
 output "ip-addresses" {
   value = { for key, machine in libvirt_domain.machine : key => "IP not assigned yet" }
