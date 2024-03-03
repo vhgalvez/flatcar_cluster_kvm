@@ -38,8 +38,8 @@ resource "libvirt_volume" "base" {
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
   content  = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
-    ssh_keys = var.ssh_keys,
-    message = "Your message here"
+    ssh_keys = var.ssh_keys
+    message = "tu mensaje aquí"
   })
 }
 
@@ -49,14 +49,6 @@ resource "libvirt_volume" "vm_disk" {
   base_volume_id = libvirt_volume.base.id
   pool           = libvirt_pool.volumetmp.name
   format         = "qcow2"
-}
-
-resource "libvirt_volume" "ignition" {
-  for_each = data.ct_config.ignition
-  name     = "${each.key}-ignition"
-  pool     = libvirt_pool.volumetmp.name
-  content  = base64decode(each.value.rendered)
-  format   = "raw"
 }
 
 resource "libvirt_domain" "machine" {
@@ -74,9 +66,7 @@ resource "libvirt_domain" "machine" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  disk {
-    volume_id = libvirt_volume.ignition[each.key].id
-  }
+  coreos_ignition = data.ct_config.ignition[each.key].rendered
 
   console {
     type        = "pty"
