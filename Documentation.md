@@ -260,3 +260,5 @@ virsh net-autostart k8s-network
 virsh net-define /path/to/k8s-network.xml
 virsh net-start k8s-network
 virsh net-autostart k8s-network
+
+docker run --rm -v $(pwd):/config:Z quay.io/coreos/fcct:release --strict /config/path_to_config.ign
