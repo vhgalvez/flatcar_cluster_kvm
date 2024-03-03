@@ -13,10 +13,6 @@ terraform {
       source  = "hashicorp/template"
       version = "~> 2.2.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.1.0"
-    }
   }
 }
 
@@ -80,17 +76,11 @@ resource "libvirt_volume" "vm_disk" {
   format         = "qcow2"
 }
 
-// Generate a unique pet name for each machine
-resource "random_pet" "machine_name" {
-  for_each = toset(var.machines)
-  length   = 2
-}
-
 // Define VM domain
 resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
 
-  name   = "${random_pet.machine_name[each.key].id}-${var.cluster_name}"
+  name   = "${each.value}-${var.cluster_name}"
   vcpu   = var.virtual_cpus
   memory = var.virtual_memory
 
