@@ -46,11 +46,6 @@ data "ct_config" "ignition" {
   })
 }
 
-
-
-
-
-
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
   name           = "${each.key}-${var.cluster_name}.qcow2"
