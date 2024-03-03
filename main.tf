@@ -3,11 +3,15 @@ terraform {
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "~> 0.6.3"
+      version = "0.6.3"
     }
     ct = {
       source  = "poseidon/ct"
-      version = "~> 0.13.0"
+      version = "0.7.1"
+    }
+    template = {
+      source  = "hashicorp/template"
+      version = "~> 2.2.0"
     }
   }
 }
@@ -37,7 +41,7 @@ resource "libvirt_volume" "base" {
 
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  content  = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
     ssh_keys = var.ssh_keys
     message  = "Your custom message here"
   })
