@@ -1,5 +1,5 @@
 variant: flatcar
-version: 1.0.0
+version: 1.1.0
 storage:
   filesystems:
     - path: /
@@ -9,13 +9,10 @@ storage:
     - path: "/etc/motd"
       mode: 0644
       contents:
-        inline:
-        #!/bin/bash
-          set -euo pipefail
-          echo My name is ${message}
-          
+        inline: |
+          ${message}
 passwd:
   users:
     - name: core
-      ssh_authorized_keys: 
-        - ${join("\n", ssh_keys)}
+      ssh_authorized_keys:
+        - ${ssh_keys}
