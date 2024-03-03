@@ -20,6 +20,13 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+// Define network
+resource "libvirt_network" "kube_network" {
+  name      = "kube_network"
+  mode      = "nat"
+  addresses = ["10.17.3.0/24"]
+}
+
 // Define storage pool
 resource "libvirt_pool" "volumetmp" {
   name = var.cluster_name
@@ -67,13 +74,6 @@ resource "libvirt_volume" "vm_disk" {
   base_volume_id = libvirt_volume.base.id
   pool           = libvirt_pool.volumetmp.name
   format         = "qcow2"
-}
-
-// Define network
-resource "libvirt_network" "kube_network" {
-  name      = "kube_network"
-  mode      = "nat"
-  addresses = ["10.17.3.0/24"]
 }
 
 // Define VM domain
