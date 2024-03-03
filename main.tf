@@ -51,7 +51,7 @@ resource "libvirt_volume" "vm_disk" {
   format         = "qcow2"
 }
 
-resource "libvirt_domain" "machine" {
+}resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
 
   name   = "${each.key}-${var.cluster_name}"
@@ -66,7 +66,8 @@ resource "libvirt_domain" "machine" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  coreos_ignition = base64decode(data.ct_config.ignition[each.key].rendered)
+  # Modificado para asignar directamente la configuración de Ignition.
+  coreos_ignition = data.ct_config.ignition[each.key].rendered
 
   console {
     type        = "pty"
@@ -80,6 +81,7 @@ resource "libvirt_domain" "machine" {
     autoport    = true
   }
 }
+
 
 output "ip-addresses" {
   value = { for key, machine in libvirt_domain.machine : key => "IP not assigned yet" }
