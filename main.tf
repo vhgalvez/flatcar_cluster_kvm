@@ -51,7 +51,7 @@ resource "libvirt_volume" "vm_disk" {
   format         = "qcow2"
 }
 
-}resource "libvirt_domain" "machine" {
+resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
 
   name   = "${each.key}-${var.cluster_name}"
