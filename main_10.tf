@@ -37,15 +37,22 @@ resource "libvirt_volume" "base" {
 
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  content  = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
     ssh_keys = var.ssh_keys
-    message  = "Your custom message here"
+    message  = "tu mensaje aquí"
   })
+}
+
+
+resource "local_file" "ignition_file" {
+  for_each = data.ct_config.ignition
+  content  = each.value.rendered
+  filename = "${path.module}/ignition/${each.key}.ign"
 }
 
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
-  name           = "${each.key}-${var.cluster_name}.qcow2"
+  name           = "${each.value}-${var.cluster_name}.qcow2"
   base_volume_id = libvirt_volume.base.id
   pool           = libvirt_pool.volumetmp.name
   format         = "qcow2"
@@ -54,7 +61,7 @@ resource "libvirt_volume" "vm_disk" {
 resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
 
-  name   = "${each.key}-${var.cluster_name}"
+  name   = "${each.value}-${var.cluster_name}"
   vcpu   = var.virtual_cpus
   memory = var.virtual_memory
 
@@ -65,8 +72,6 @@ resource "libvirt_domain" "machine" {
   disk {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
-
-  coreos_ignition = data.ct_config.ignition[each.key].rendered
 
   console {
     type        = "pty"
@@ -82,5 +87,5 @@ resource "libvirt_domain" "machine" {
 }
 
 output "ip-addresses" {
-  value = { for key, machine in libvirt_domain.machine : key => machine.network_interface.0.addresses[0] }
+  value = { for key in var.machines : key => "IP not assigned yet" }
 }
