@@ -38,14 +38,14 @@ resource "libvirt_volume" "base" {
   pool   = libvirt_pool.volumetmp.name
   format = "qcow2"
 }
-
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
   content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
-    ssh_keys = var.ssh_keys,
+    ssh_keys = jsonencode(var.ssh_keys),
     message  = "Your custom message here"
   })
 }
+
 
 
 
