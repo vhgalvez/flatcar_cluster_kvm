@@ -35,28 +35,34 @@ resource "libvirt_volume" "base" {
   format = "qcow2"
 }
 
-// Se asume que los archivos de configuración de Ignition ya están generados y almacenados
-// bajo el directorio "ignition_files" dentro del módulo de Terraform.
-resource "libvirt_volume" "ignition" {
+data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  name     = "${each.key}-ignition.qcow2"
-  pool     = libvirt_pool.volumetmp.name
-  source   = "${path.module}/ignition_files/${each.key}.ign"
-  format   = "raw"
+  content  = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+    ssh_keys = var.ssh_keys,
+    message = "Your message here"
+  })
 }
 
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
-  name           = "${each.key}-${var.cluster_name}.qcow2"
+  name           = "${each.value}-${var.cluster_name}.qcow2"
   base_volume_id = libvirt_volume.base.id
   pool           = libvirt_pool.volumetmp.name
   format         = "qcow2"
 }
 
+resource "libvirt_volume" "ignition" {
+  for_each = data.ct_config.ignition
+  name     = "${each.key}-ignition"
+  pool     = libvirt_pool.volumetmp.name
+  content  = base64decode(each.value.rendered)
+  format   = "raw"
+}
+
 resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
 
-  name   = "${each.key}-${var.cluster_name}"
+  name   = "${each.value}-${var.cluster_name}"
   vcpu   = var.virtual_cpus
   memory = var.virtual_memory
 
@@ -86,5 +92,5 @@ resource "libvirt_domain" "machine" {
 }
 
 output "ip-addresses" {
-  value = { for key in var.machines : key => "IP not assigned" }
+  value = { for key in var.machines : key => libvirt_domain.machine[key].network_interface.0.addresses[0] }
 }
