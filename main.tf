@@ -54,7 +54,7 @@ resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
   name           = "${each.value}-${var.cluster_name}.qcow2"
   base_volume_id = libvirt_volume.base.id
-  pool           = libvirt_pool.volumetmp.id
+  pool           = libvirt_pool.volumetmp.name
   format         = "qcow2"
 }
 
