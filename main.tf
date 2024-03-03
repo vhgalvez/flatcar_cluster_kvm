@@ -37,7 +37,7 @@ resource "libvirt_volume" "base" {
 
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  content  = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
     ssh_keys = var.ssh_keys
     message  = "Your custom message here"
   })
@@ -66,7 +66,7 @@ resource "libvirt_domain" "machine" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  coreos_ignition = data.ct_config.ignition[each.key].rendered
+  coreos_ignition = base64decode(data.ct_config.ignition[each.key].rendered)
 
   console {
     type        = "pty"
@@ -82,5 +82,5 @@ resource "libvirt_domain" "machine" {
 }
 
 output "ip-addresses" {
-  value = { for key, machine in libvirt_domain.machine : key => machine.network_interface.0.addresses[0] }
+  value = { for key, machine in libvirt_domain.machine : key => "IP not assigned yet" }
 }
