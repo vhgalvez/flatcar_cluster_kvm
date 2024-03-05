@@ -1,4 +1,3 @@
-
 terraform {
   required_version = ">= 0.13.0"
   required_providers {
@@ -10,12 +9,9 @@ terraform {
       source  = "poseidon/ct"
       version = "~> 0.13.0"
     }
-    template = {
-      source  = "hashicorp/template"
-      version = "~> 2.2.0"
-    }
   }
 }
+
 provider "libvirt" {
   uri = "qemu:///system"
 }
@@ -38,10 +34,11 @@ resource "libvirt_volume" "base" {
   pool   = libvirt_pool.volumetmp.name
   format = "qcow2"
 }
+
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  content  = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl",{
-    ssh_keys = var.ssh_keys, # Assuming this is a list of actual SSH keys
+  content  = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+    ssh_keys = var.ssh_keys
     message  = "Your custom message here"
   })
 }
@@ -82,11 +79,6 @@ resource "libvirt_domain" "machine" {
     listen_type = "address"
     autoport    = true
   }
-}
-resource "local_file" "ignition" {
-  for_each = toset(var.machines)
-  content  = data.ct_config.ignition[each.key].rendered
-  filename = "${path.module}/ignition_files/${each.key}.ign"
 }
 
 output "ip-addresses" {
