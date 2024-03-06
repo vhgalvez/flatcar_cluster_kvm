@@ -252,6 +252,7 @@ cat terraform/main.tf && cat terraform/variables.tf && cat terraform/outputs.tf 
 
 
 
+
 virsh net-define /path/to/k8s-network.xml
 virsh net-start k8s-network
 virsh net-autostart k8s-network
@@ -264,3 +265,16 @@ virsh net-autostart k8s-network
 docker run --rm -v $(pwd):/config:Z quay.io/coreos/fcct:release --strict /config/path_to_config.ign
 
 sudo podman run --rm -v $(pwd):/config:Z quay.io/coreos/fcct:release --strict /config/machine-3.ign
+
+
+sudo podman run --rm -v $(pwd):/config:Z quay.io/coreos/fcct:release --strict /root/ign/mv_instancia_flatcar-config.ign
+
+
+virsh net-define network_defaul.xml
+
+virsh net-start network_defaul
+virsh net-start defaul
+
+sudo ssh -i /root/.ssh/id_rsa_mv_instancia_flatcar core@192.168.122.161 -p 22
+
+sudo /usr/local/bin/ct -in-file /root/ign/mv_instancia_flatcar-config.yaml -out-file /root/ign/mv_instancia_flatcar-config.ign

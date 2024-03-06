@@ -1,21 +1,15 @@
 variant: flatcar
 version: 1.1.0
-storage:
-  filesystems:
-    - path: /
-      device: "/dev/disk/by-label/ROOT"
-      format: "ext4"
-  files:
-    - path: "/etc/motd"
-      mode: 0644
-      contents:
-        inline:
-        #!/bin/bash
-          set -euo pipefail
-          echo My name is ${message}
-          
 passwd:
   users:
     - name: core
-      ssh_authorized_keys: 
-        - ${join("\n", ssh_keys)}
+      ssh_authorized_keys:
+        ${jsonencode(var.ssh_keys)}
+storage:
+  files:
+    - path: /etc/motd
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          ${message}
