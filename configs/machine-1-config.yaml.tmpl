@@ -3,12 +3,11 @@ version: 1.1.0
 passwd:
   users:
     - name: core
-      ssh_authorized_keys:
-        ${jsonencode(var.ssh_keys)}
+      ssh_authorized_keys: 
+        - ${ssh_keys}
 storage:
   files:
-    - path: /etc/motd
-      filesystem: root
+    - path: "/etc/motd"
       mode: 0644
       contents:
         inline: |
