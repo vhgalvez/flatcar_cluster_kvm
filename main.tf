@@ -38,6 +38,8 @@ resource "libvirt_volume" "base" {
   format = "qcow2"
 }
 
+
+
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
 
@@ -45,6 +47,8 @@ data "ct_config" "ignition" {
     ssh_keys = jsonencode(var.ssh_keys),
     message  = "Welcome to Flatcar Linux!"
   })
+  strict       = true
+  pretty_print = true
 }
 
 
