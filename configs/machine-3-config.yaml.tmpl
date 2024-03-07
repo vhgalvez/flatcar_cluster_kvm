@@ -4,15 +4,12 @@ passwd:
   users:
     - name: core
       ssh_authorized_keys:
-        - "${ssh_keys}"
+        - ${ssh_keys}
 storage:
-  filesystems:
-    - path: /
-      device: "/dev/disk/by-label/ROOT"
-      format: "ext4"
   files:
-    - path: "/etc/motd"
+    - path: /etc/motd
+      filesystem: root
       mode: 0644
       contents:
         inline: |
-          ${message}
+          Welcome to Flatcar Linux! ${message}
