@@ -42,8 +42,8 @@ data "ct_config" "ignition" {
   for_each = toset(var.machines)
 
   content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
-    ssh_keys = var.ssh_keys,
-    message  = "Welcome to Flatcar Linux" # Asegúrate de ajustar este mensaje según sea necesario
+    ssh_keys = var.ssh_keys,               # Asegúrate de que esto es una lista de tus claves SSH
+    message  = "Welcome to Flatcar Linux!" # Tu mensaje personalizado
   })
 }
 
