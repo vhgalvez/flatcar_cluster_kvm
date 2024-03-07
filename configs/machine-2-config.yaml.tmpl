@@ -8,6 +8,7 @@ storage:
   files:
     - path: /etc/hostname
       filesystem: "root"
+      mode: 0644
       contents:
         inline: ${host_name}
     - path: /home/core/works
