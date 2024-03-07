@@ -39,18 +39,12 @@ resource "libvirt_volume" "base" {
 }
 
 
-
-
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
-
   content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
-    ssh_keys = join("\n  - ", var.ssh_keys),
+    ssh_keys = var.ssh_keys,
     message  = "Welcome to Flatcar Linux"
   })
-
-  strict       = true
-  pretty_print = true
 }
 
 resource "libvirt_volume" "vm_disk" {
