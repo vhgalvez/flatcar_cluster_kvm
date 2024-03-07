@@ -3,7 +3,7 @@ terraform {
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "0.6.9-pre2"
+      version = "0.7.6"
     }
     ct = {
       source  = "poseidon/ct"
