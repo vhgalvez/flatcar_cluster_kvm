@@ -9,7 +9,7 @@ terraform {
       source  = "poseidon/ct"
       version = "0.11.0"
     }
-     template = {
+    template = {
       source  = "hashicorp/template"
       version = "~> 2.2.0"
     }
@@ -46,9 +46,9 @@ resource "libvirt_volume" "base" {
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
   content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
-    ssh_keys = jsonencode(var.ssh_keys),
-    hostname = "algún valor o variable para hostname"
-    name     = each.key
+    ssh_keys  = jsonencode(var.ssh_keys),
+    host_name = "algún valor o variable para hostname"
+    name      = each.key
   })
   strict       = true
   pretty_print = true

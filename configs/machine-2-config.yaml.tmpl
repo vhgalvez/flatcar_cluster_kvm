@@ -1,9 +1,15 @@
+---
 passwd:
   users:
     - name: core
       ssh_authorized_keys: ${ssh_keys}
+
 storage:
   files:
+    - path: /etc/hostname
+      filesystem: "root"
+      contents:
+        inline: ${host_name}
     - path: /home/core/works
       filesystem: root
       mode: 0755
@@ -11,5 +17,4 @@ storage:
         inline: |
           #!/bin/bash
           set -euo pipefail
-          hostname="$(hostname)"
-          echo "My name is ${name} and the hostname is ${hostname}"
+          echo My name is ${name} and the hostname is ${host_name}
