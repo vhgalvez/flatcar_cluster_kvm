@@ -43,13 +43,12 @@ data "ct_config" "ignition" {
   for_each = toset(var.machines)
 
   content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
-    ssh_keys = var.ssh_keys,               # Esto asume que var.ssh_keys ya es una lista
-    message  = "Welcome to Flatcar Linux!" # Mensaje personalizado
+    ssh_keys = var.ssh_keys,
+    message  = "Welcome to Flatcar Linux!"
   })
   strict       = true
   pretty_print = true
 }
-
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
   name           = "${each.key}-${var.cluster_name}.qcow2"
