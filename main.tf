@@ -1,5 +1,6 @@
 terraform {
   required_version = ">= 0.13.0"
+
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
@@ -15,6 +16,8 @@ terraform {
 provider "libvirt" {
   uri = "qemu:///system"
 }
+
+provider "ct" {}
 
 resource "libvirt_network" "kube_network" {
   name      = "kube_network"
@@ -37,10 +40,13 @@ resource "libvirt_volume" "base" {
 
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
-    ssh_keys = join("\n", formatlist("        - \"%s\"", var.ssh_keys)),
-    message  = "Welcome to Flatcar Linux"
+
+  content = templatefile("${path.module}/configs/${each.key}.yaml", {
+    ssh_keys = jsonencode(var.ssh_keys),
+    hostname = each.key
   })
+
+  pretty_print = true
 }
 
 resource "libvirt_volume" "vm_disk" {
@@ -54,8 +60,8 @@ resource "libvirt_volume" "vm_disk" {
 resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
 
-  name   = "${each.key}-${var.cluster_name}"
-  vcpu   = var.virtual_cpus
+  name = each.key
+  vcpu = var.virtual_cpus
   memory = var.virtual_memory
 
   network_interface {
@@ -67,18 +73,6 @@ resource "libvirt_domain" "machine" {
   }
 
   coreos_ignition = data.ct_config.ignition[each.key].rendered
-
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
-  }
-
-  graphics {
-    type        = "vnc"
-    listen_type = "address"
-    autoport    = true
-  }
 }
 
 output "ip-addresses" {
