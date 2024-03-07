@@ -42,8 +42,8 @@ data "ct_config" "ignition" {
   for_each = toset(var.machines)
 
   content = templatefile("${path.module}/configs/${each.key}.yaml", {
-    ssh_keys = jsonencode(var.ssh_keys),
-    hostname = each.key
+    ssh_keys = join("\n", formatlist("        - \"%s\"", var.ssh_keys)),
+    message  = "Welcome to Flatcar Linux"
   })
 
   pretty_print = true
