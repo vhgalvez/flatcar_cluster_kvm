@@ -9,6 +9,10 @@ terraform {
       source  = "poseidon/ct"
       version = "~> 0.13.0"
     }
+    template = {
+      source  = "hashicorp/template"
+      version = "~> 2.2.0"
+    }
   }
 }
 
@@ -37,7 +41,7 @@ resource "libvirt_volume" "base" {
 
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  content  = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
     ssh_keys = var.ssh_keys
     message  = "Your custom message here"
   })
