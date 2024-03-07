@@ -13,8 +13,10 @@ terraform {
       source  = "hashicorp/template"
       version = "~> 2.2.0"
     }
+
   }
 }
+
 
 provider "libvirt" {
   uri = "qemu:///system"
@@ -41,20 +43,15 @@ resource "libvirt_volume" "base" {
   format = "qcow2"
 }
 
-data "template_file" "vm-configs" {
+data "ct_config" "ignition" {
   for_each = toset(var.machines)
-  template = file("${path.module}/machine-${each.key}.yaml.tmpl")
-
-  vars = {
-    ssh_keys = jsonencode(var.ssh_keys)
-    name     = each.key
-    host_name = "${each.key}.${var.cluster_name}.${var.cluster_domain}"
-  }
-}
-
-data "ct_config" "vm-ignitions" {
-  for_each = toset(var.machines)
-  content  = data.template_file.vm-configs[each.key].rendered
+  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+    ssh_keys  = jsonencode(var.ssh_keys),
+    host_name = "algún valor o variable para hostname"
+    name      = each.key
+  })
+  strict       = true
+  pretty_print = true
 }
 
 resource "libvirt_volume" "vm_disk" {
@@ -80,7 +77,7 @@ resource "libvirt_domain" "machine" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  coreos_ignition = data.ct_config.vm-ignitions[each.key].rendered
+  coreos_ignition = data.ct_config.ignition[each.key].rendered
 }
 
 output "ip-addresses" {
