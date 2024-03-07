@@ -4,7 +4,7 @@ passwd:
   users:
     - name: core
       ssh_authorized_keys:
-${indent(8, join("\n", formatlist("- \"%s\"", ssh_keys)))}
+${ssh_keys}
 storage:
   files:
     - path: "/etc/motd"
