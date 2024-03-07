@@ -38,15 +38,13 @@ resource "libvirt_volume" "base" {
   format = "qcow2"
 }
 
-data "ct_config" "ignition" {
-  for_each = toset(var.machines)
 
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
 
   content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
-    ssh_keys = var.ssh_keys,
-    message  = "Welcome to Flatcar Linux!"
+    ssh_keys = var.ssh_keys,               # Esto asume que var.ssh_keys ya es una lista
+    message  = "Welcome to Flatcar Linux!" # Mensaje personalizado
   })
   strict       = true
   pretty_print = true
