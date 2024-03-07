@@ -4,11 +4,10 @@ passwd:
   users:
     - name: core
       ssh_authorized_keys:
-        ${ssh_authorized_keys}
+        - ${ssh_keys}
 storage:
   files:
     - path: /etc/motd
-      filesystem: root
       mode: 0644
       contents:
         inline: |
