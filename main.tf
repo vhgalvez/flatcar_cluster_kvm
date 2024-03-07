@@ -45,10 +45,10 @@ data "ct_config" "ignition" {
     ssh_keys = var.ssh_keys,
     message  = "Welcome to Flatcar Linux"
   })
-strict       = true
-pretty_print = true
-
+  strict       = true
+  pretty_print = true
 }
+
 
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
