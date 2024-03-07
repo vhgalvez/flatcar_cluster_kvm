@@ -39,7 +39,7 @@ resource "libvirt_volume" "base" {
 }
 
 
-data "ct_config" "example" {
+data "ct_config" "ignition" {
   content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
     ssh_keys = join("\n  - ", var.ssh_keys), # Esto unirá la lista con una nueva línea y guiones como prefijos
     message  = "Este es tu mensaje personalizado"
