@@ -46,8 +46,8 @@ data "ct_config" "ignition" {
   for_each = toset(var.machines)
   content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
     ssh_keys = jsonencode(var.ssh_keys),
-    hostname = "algún valor o variable para hostname"  # Agrega esta línea
-    name     = each.key  # Agrega esta línea
+    hostname = "algún valor o variable para hostname" 
+    name     = each.key                         
   })
   strict       = true
   pretty_print = true
