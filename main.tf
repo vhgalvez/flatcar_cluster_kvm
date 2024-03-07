@@ -42,7 +42,7 @@ resource "libvirt_volume" "base" {
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
 
-  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+  content = templatefile("${path.module}/configs/${each.value}-config.yaml.tmpl", {
     ssh_authorized_keys = jsonencode(var.ssh_keys),
     message             = "Welcome to Flatcar Linux!"
   })
