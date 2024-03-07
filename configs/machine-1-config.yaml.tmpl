@@ -1,5 +1,10 @@
 variant: flatcar
 version: 1.1.0
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        ${jsonencode(ssh_keys)}
 storage:
   filesystems:
     - path: /
@@ -10,9 +15,4 @@ storage:
       mode: 0644
       contents:
         inline: |
-          Welcome to Flatcar Linux! ${message}
-passwd:
-  users:
-    - name: core
-      ssh_authorized_keys:
-        ${jsonencode(ssh_keys)}
+          ${message}
