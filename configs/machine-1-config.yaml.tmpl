@@ -3,10 +3,7 @@ version: 1.1.0
 passwd:
   users:
     - name: core
-      ssh_authorized_keys:
-        %{ for ssh_key in ssh_keys ~}
-        - ${ssh_key}
-        %{ endfor ~}
+      ssh_authorized_keys: ${ssh_keys}
 storage:
   files:
     - path: "/etc/motd"
