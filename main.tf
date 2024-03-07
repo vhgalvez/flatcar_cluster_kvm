@@ -42,17 +42,16 @@ resource "libvirt_volume" "base" {
   format = "qcow2"
 }
 
-
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
   content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
     ssh_keys = jsonencode(var.ssh_keys),
-    message  = "Welcome to Flatcar Linux"
+    message  = "Welcome to Flatcar Linux",
+    name     = each.key  # Agrega esta línea
   })
   strict       = true
   pretty_print = true
 }
-
 
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
