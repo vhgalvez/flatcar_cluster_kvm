@@ -46,13 +46,12 @@ data "ct_config" "ignition" {
 
   content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
     ssh_keys = join("\n  - ", var.ssh_keys),
-    message  = "Welcome to Flatcar Linux!
+    message  = "Welcome to Flatcar Linux"
   })
 
   strict       = true
   pretty_print = true
 }
-
 
 resource "libvirt_volume" "vm_disk" {
   for_each       = toset(var.machines)
