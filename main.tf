@@ -41,12 +41,10 @@ resource "libvirt_volume" "base" {
 data "ct_config" "ignition" {
   for_each = toset(var.machines)
 
-  content = templatefile("${path.module}/configs/${each.key}.yaml", {
-    ssh_keys = join("\n", formatlist("        - \"%s\"", var.ssh_keys)),
-    message  = "Welcome to Flatcar Linux"
+  content = templatefile("${path.module}/configs/${each.key}-config.yaml.tmpl", {
+    ssh_keys = var.ssh_keys,
+    message  = "Welcome to Flatcar Linux" # Asegúrate de ajustar este mensaje según sea necesario
   })
-
-  pretty_print = true
 }
 
 resource "libvirt_volume" "vm_disk" {
@@ -60,8 +58,8 @@ resource "libvirt_volume" "vm_disk" {
 resource "libvirt_domain" "machine" {
   for_each = toset(var.machines)
 
-  name = each.key
-  vcpu = var.virtual_cpus
+  name   = each.key
+  vcpu   = var.virtual_cpus
   memory = var.virtual_memory
 
   network_interface {

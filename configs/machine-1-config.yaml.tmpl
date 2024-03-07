@@ -4,7 +4,9 @@ passwd:
   users:
     - name: core
       ssh_authorized_keys:
-${ssh_keys}
+        %{ for ssh_key in ssh_keys ~}
+        - "${ssh_key}"
+        %{ endfor ~}
 storage:
   files:
     - path: "/etc/motd"
