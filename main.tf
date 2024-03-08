@@ -90,6 +90,11 @@ resource "libvirt_domain" "machine" {
   }
 
   coreos_ignition = libvirt_ignition.ignition[each.key].id
+
+  graphics {
+    type        = "vnc"
+    listen_type = "address"
+  }
 }
 
 output "ip-addresses" {
