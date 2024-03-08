@@ -1,4 +1,7 @@
 ---
+ignition:
+  version: 2.2.0
+
 passwd:
   users:
     - name: core
@@ -19,6 +22,3 @@ storage:
           #!/bin/bash
           set -euo pipefail
           echo My name is ${name} and the hostname is ${host_name}
-
-ignition:
-  version: 2.2.0
