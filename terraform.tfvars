@@ -8,4 +8,3 @@ virtual_cpus   = 2
 virtual_memory = 2048
 cluster_name   = "flatcar"
 cluster_domain = "example.com"
-```
