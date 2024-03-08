@@ -278,3 +278,7 @@ virsh net-start defaul
 sudo ssh -i /root/.ssh/id_rsa_mv_instancia_flatcar core@192.168.122.161 -p 22
 
 sudo /usr/local/bin/ct -in-file /root/ign/mv_instancia_flatcar-config.yaml -out-file /root/ign/mv_instancia_flatcar-config.ign
+
+
+
+sudo ssh -i /root/.ssh/id_rsa_mv_instancia_flatcar core@10.17.3.12 -p 22
