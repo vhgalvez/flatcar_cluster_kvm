@@ -51,13 +51,19 @@ data "template_file" "vm-configs" {
     host_name    = "${each.key}.${var.cluster_name}.${var.cluster_domain}"
     strict       = true
     pretty_print = true
-
   }
 }
 
 data "ct_config" "vm-ignitions" {
   for_each = toset(var.machines)
   content  = data.template_file.vm-configs[each.key].rendered
+}
+
+resource "libvirt_ignition" "ignition" {
+  for_each = toset(var.machines)
+  name     = "${each.key}-ignition"
+  pool     = libvirt_pool.volumetmp.name
+  content  = data.ct_config.vm-ignitions[each.key].rendered
 }
 
 resource "libvirt_volume" "vm_disk" {
@@ -83,7 +89,7 @@ resource "libvirt_domain" "machine" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  coreos_ignition = data.ct_config.vm-ignitions[each.key].rendered
+  coreos_ignition = libvirt_ignition.ignition[each.key].id
 }
 
 output "ip-addresses" {
