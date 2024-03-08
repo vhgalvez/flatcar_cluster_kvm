@@ -83,6 +83,7 @@ resource "libvirt_domain" "machine" {
 
   network_interface {
     network_id = libvirt_network.kube_network.id
+    wait_for_lease = true
   }
 
   disk {
@@ -98,5 +99,5 @@ resource "libvirt_domain" "machine" {
 }
 
 output "ip-addresses" {
-  value = { for key, machine in libvirt_domain.machine : key => machine.network_interface.0.addresses[0] }
+  value = { for key, machine in libvirt_domain.machine : key => machine.network_interface.0.addresses[0] if length(machine.network_interface.0.addresses) > 0 }
 }
