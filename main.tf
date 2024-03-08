@@ -43,12 +43,15 @@ resource "libvirt_volume" "base" {
 
 data "template_file" "vm-configs" {
   for_each = toset(var.machines)
-  template = file("${path.module}/configs/${each.key}-config.yaml.tmpl",)
+  template = file("${path.module}/configs/${each.key}-config.yaml.tmpl", )
 
   vars = {
-    ssh_keys = jsonencode(var.ssh_keys)
-    name     = each.key
-    host_name = "${each.key}.${var.cluster_name}.${var.cluster_domain}"
+    ssh_keys     = jsonencode(var.ssh_keys)
+    name         = each.key
+    host_name    = "${each.key}.${var.cluster_name}.${var.cluster_domain}"
+    strict       = true
+    pretty_print = true
+
   }
 }
 
