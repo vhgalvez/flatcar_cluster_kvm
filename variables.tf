@@ -2,7 +2,6 @@
 variable "cluster_name" {
   description = "Nombre del cluster o entorno"
   type        = string
-  default     = "entorno-testing"
 }
 
 variable "base_image" {
@@ -32,5 +31,4 @@ variable "virtual_memory" {
 variable "cluster_domain" {
   description = "The domain of the cluster"
   type        = string
-  default     = "example.com"
 }
