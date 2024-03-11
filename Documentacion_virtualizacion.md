@@ -148,3 +148,8 @@ DNS2="8.8.4.4"
 
 
 cat terraform/main.tf && cat terraform/variables.tf && cat terraform/outputs.tf && cat terraform/terraform.tfvars && cat configs/machine-1-config.yaml.tmpl && cat configs/machine-2-config.yaml.tmpl && cat configs/machine-3-config.yaml.tmpl && cat terraform/outputs/machine-1.ign  &&  tree -h
+
+
+
+
+https://computingforgeeks.com/use-open-vswitch-bridge-on-kvm-virtual-machines/
