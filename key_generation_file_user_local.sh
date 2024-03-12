@@ -21,6 +21,9 @@ SSH_KEY_NAME="id_rsa_clusterkey"        # Nombre predeterminado del par de clave
 SSH_EMAIL="user@example.com"            # Email para asociar con la clave SSH
 LOG_FILE="${USER_HOME}/ssh_keygen.log"  # Archivo de log
 
+# Definir la ruta completa al archivo de la clave privada
+SSH_PRIVATE_KEY="${SSH_DIR}/${SSH_KEY_NAME}"
+
 # Crear directorio para logs si no existe
 if [ ! -d "$(dirname "$LOG_FILE")" ]; then
   mkdir -p "$(dirname "$LOG_FILE")"
