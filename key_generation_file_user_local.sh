@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script mejorado para generar múltiples pares de claves SSH con email
+# Script mejorado para generar múltiples pares de claves SSH con email sin entrada del usuario
 
 # Configuramos opciones de salida seguras para el script
 set -e
@@ -16,27 +16,16 @@ else
 fi
 
 # Definición de variables para personalización
-SSH_DIR="${USER_HOME}/.ssh/clusterkey"  # Asegurar que usamos el directorio .ssh del usuario real
-SSH_KEY_NAME="id_rsa_clusterkey"   # Nombre por defecto del par de claves SSH corregido
-SSH_EMAIL=""           # Email para asociar con la clave SSH
-LOG_FILE="${USER_HOME}/ssh_keygen.log"  # Cambio a un archivo de log en el home del usuario para evitar necesidad de sudo
+SSH_DIR="${USER_HOME}/.ssh/clusterkey"  # Directorio para almacenar las claves SSH
+SSH_KEY_NAME="id_rsa_clusterkey"        # Nombre predeterminado del par de claves SSH
+SSH_EMAIL="user@example.com"            # Email para asociar con la clave SSH
+LOG_FILE="${USER_HOME}/ssh_keygen.log"  # Archivo de log
 
-# Crear directorio para logs si no existe (evitando privilegios de superusuario si es posible)
+# Crear directorio para logs si no existe
 if [ ! -d "$(dirname "$LOG_FILE")" ]; then
   mkdir -p "$(dirname "$LOG_FILE")"
   chmod 755 "$(dirname "$LOG_FILE")"
 fi
-
-# Comprobación y solicitud de personalización
-read -p "Ingrese el directorio donde desea almacenar las claves SSH [${SSH_DIR}]: " input_ssh_dir
-read -p "Ingrese el nombre deseado para el par de claves SSH [${SSH_KEY_NAME}]: " input_ssh_key_name
-read -p "Ingrese el email asociado a la clave SSH: " input_ssh_email
-
-# Usar valores proporcionados por el usuario o valores predeterminados
-SSH_DIR=${input_ssh_dir:-$SSH_DIR}
-SSH_KEY_NAME=${input_ssh_key_name:-$SSH_KEY_NAME}
-SSH_EMAIL=${input_ssh_email:-$SSH_EMAIL}
-SSH_PRIVATE_KEY="${SSH_DIR}/${SSH_KEY_NAME}"
 
 # Función para crear el directorio SSH si no existe
 create_ssh_dir() {
