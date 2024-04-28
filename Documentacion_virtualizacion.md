@@ -153,3 +153,6 @@ cat terraform/main.tf && cat terraform/variables.tf && cat terraform/outputs.tf 
 
 
 https://computingforgeeks.com/use-open-vswitch-bridge-on-kvm-virtual-machines/
+
+
+https://computingforgeeks.com/deploy-kubernetes-on-kvm-using-flatcar-container-linux/
