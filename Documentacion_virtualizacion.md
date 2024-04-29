@@ -156,3 +156,5 @@ https://computingforgeeks.com/use-open-vswitch-bridge-on-kvm-virtual-machines/
 
 
 https://computingforgeeks.com/deploy-kubernetes-on-kvm-using-flatcar-container-linux/
+
+https://medium.com/@tcij1013/installing-okd-the-community-distribution-of-kubernetes-4-x-cluster-on-a-single-node-8410146858b6
