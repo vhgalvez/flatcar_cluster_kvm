@@ -22,7 +22,6 @@ provider "libvirt" {
 }
 
 provider "ct" {}
-
 resource "libvirt_network" "kube_network" {
   name      = "kube_network"
   mode      = "nat"
