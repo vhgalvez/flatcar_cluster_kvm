@@ -83,7 +83,7 @@ resource "libvirt_domain" "machine" {
   memory = var.virtual_memory
 
   network_interface {
-    network_id = libvirt_network.kube_network.id
+    network_id     = libvirt_network.kube_network.id
     wait_for_lease = true
   }
 
