@@ -33,7 +33,6 @@ resource "libvirt_pool" "volumetmp" {
   type = "dir"
   path = "/var/lib/libvirt/images/${var.cluster_name}"
 }
-
 resource "libvirt_volume" "base" {
   name   = "${var.cluster_name}-base"
   source = var.base_image
